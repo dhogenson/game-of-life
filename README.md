@@ -5,7 +5,9 @@ This is a simple [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27
 # Controls
 
 Click - Toggle a cell
+
 Right arrow - Progress a generation
+
 R - Clears the board
 
 # Install
