@@ -92,6 +92,15 @@ Entry point that:
 - `draw_ui()`: Placeholder for UI text (controls, generation, population) - currently unimplemented (src/main.rs:126-128)
 - `draw_board()`: Renders all cells as rectangles with color coding
 
+**Platform-Specific Features**:
+- Windows release builds hide the console window using `#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]`
+
+**Key Features**:
+- **Mouse Tracking**: Continuously tracks mouse position and converts to board coordinates
+- **Pressed Keys Tracking**: Uses HashSet to track currently pressed keys for continuous actions
+- **Auto-Advance Mode**: When F key is held, automatically advances simulation at 20 ticks/second
+- **Timing System**: Uses `Instant` and `Duration` to control auto-advance tick rate independently of FPS
+
 ### Board Module (src/board.rs)
 
 The `Board` struct represents the game grid:
@@ -114,8 +123,12 @@ The `Board` struct represents the game grid:
 Listed in `Cargo.toml`:
 
 - **piston_window** (0.130.0): 2D graphics and window management library
-  - Used for: Window creation, event handling, 2D rendering, keyboard input
+  - Used for: Window creation, event handling, 2D rendering, keyboard/mouse input
   - Provides: Graphics context, rectangle drawing, frame rendering, VSync
+
+**Standard Library Usage**:
+- **std::time**: Duration and Instant for timing auto-advance ticks
+- **std::collections::HashSet**: Tracking currently pressed keys for continuous actions
 
 **Edition**: Rust 2024 (latest edition)
 
@@ -189,8 +202,13 @@ When working with this codebase:
 - **Generic graphics**: Use `<G: Graphics>` for rendering functions to work with any graphics backend
 - **Context and transform**: Always use `context.transform` for positioning rectangles
 - **Color format**: RGBA as `[f64; 4]` with values 0.0-1.0
-- **Event handling**: Match on `Button::Keyboard(key)` for keyboard input
+- **Event handling**:
+  - Match on `Button::Keyboard(key)` for keyboard input
+  - Match on `Button::Mouse(button)` for mouse button input
+  - Use `event.mouse_cursor_args()` to get mouse position
+  - Use `event.press_args()` and `event.release_args()` for button events
 - **Drawing**: Call `window.draw_2d(&event, |context, graphics, _device| { ... })`
+- **Event loop**: Use `Events::new(EventSettings::new().max_fps(fps))` to configure FPS
 
 ## Testing Strategy
 
@@ -228,8 +246,7 @@ mod tests {
     #[test]
     fn test_clear_board() {
         let mut board = Board::new(10, 10);
-        let player = Player::new();
-        board.player_toggle_cell(player);
+        board.player_toggle_cell(0, 0);
         assert_eq!(board.population, 1);
         board.clear_board();
         assert_eq!(board.population, 0);
@@ -262,9 +279,10 @@ mod tests {
 ### Performance Considerations
 
 - The game uses `clone()` liberally for simplicity; consider refactoring to use references for very large boards
-- Piston handles rendering efficiently with VSync enabled
-- The 70x70 grid (4900 cells) renders smoothly on modern hardware
+- Piston handles rendering efficiently with VSync enabled and 60 FPS cap
+- The 50x50 grid (2500 cells) renders smoothly on modern hardware
 - Release builds (`--release`) are recommended for best performance
+- Auto-advance mode runs at 20 ticks/second (50ms interval) when F key is held
 - Board logic (tick) is fast; rendering is the primary bottleneck for very large boards
 
 ## Future Enhancements
@@ -272,19 +290,21 @@ mod tests {
 Potential features to add:
 
 ### High Priority
-- **Implement UI text display**: Complete the `draw_ui()` function to show controls, generation count, and population (src/main.rs:83-89)
+- **Implement UI text display**: Complete the `draw_ui()` function to show controls, generation count, and population (src/main.rs:126-128)
 - **Text rendering**: Integrate a text rendering solution (e.g., `piston_window::Glyphs`, `glyph_brush`)
 
 ### Feature Enhancements
 - **Preset patterns**: Load famous Game of Life patterns (glider guns, spaceships, pulsars, etc.)
 - **Save/Load**: Serialize board state to files (JSON, binary, or RLE format)
 - **Configurable board size**: Command-line arguments for dimensions
-- **Auto-advance mode**: Automatic simulation with adjustable tick rate (spacebar to pause/resume)
+- **Configurable auto-advance speed**: Make tick interval adjustable via keyboard controls
+- **Pause/Resume**: Toggle auto-advance on/off instead of requiring key hold
 - **Wrap-around mode**: Toroidal topology option (edges connect)
 - **Pattern library**: Built-in collection of interesting patterns with keyboard shortcuts
-- **Color schemes**: Customizable colors for cells and cursor
+- **Color schemes**: Customizable colors for cells
 - **Zoom controls**: Scale view in/out for different board sizes
 - **Pan controls**: Move viewport for boards larger than window
+- **Mouse drawing mode**: Click and drag to paint multiple cells
 
 ### Advanced Features
 - **Statistics panel**: Track max population, generation of last change, stable detection
