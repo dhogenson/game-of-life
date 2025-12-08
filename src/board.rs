@@ -1,8 +1,7 @@
-/// Represents the game board for Conway's Game of Life
-///
-/// The board is a 2D grid where each cell can be either alive (1) or dead (0).
-/// It tracks the current state of all cells and maintains a count of living cells.
-/// 
+// Represents the game board for Conway's Game of Life
+// The board is a 2D grid where each cell can be either alive (1) or dead (0).
+// It tracks the current state of all cells and maintains a count of living cells.
+
 #[derive(Clone)]
 pub struct Board {
     pub size_x: i8,          // Width of the board (number of columns)

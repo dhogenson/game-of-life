@@ -7,13 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a fully functional graphical implementation of Conway's Game of Life in Rust with an interactive editor. The game includes:
 
 - Complete Game of Life simulation following Conway's standard rules
-- Interactive cursor-based cell editor
+- Interactive mouse-based cell editor
 - Real-time generation tracking and population display
 - Graphical rendering using Piston game engine
-- Colorized cell visualization (green = alive, dark gray = dead, red = cursor)
-- Keyboard controls for cell manipulation and simulation advancement
+- Clean cell visualization (black = alive, white = dead)
+- Mouse controls for cell manipulation and keyboard controls for simulation
+- Auto-advance mode for continuous simulation
 
-**Status**: Core functionality complete. Game logic, rendering, and player controls are all implemented. UI text display is a placeholder for future enhancement.
+**Status**: Core functionality complete. Game logic, rendering, and mouse controls are all implemented. UI text display is a placeholder for future enhancement.
 
 ## Build and Run Commands
 
@@ -53,9 +54,9 @@ cargo clippy -- -W clippy::all
 
 When running the application:
 
-- **WASD**: Move cursor around the board
-- **Space**: Toggle cell state (alive/dead) at cursor position
+- **Left Mouse Click**: Toggle cell state (alive/dead) at mouse position
 - **Right Arrow (→)**: Advance simulation by one generation
+- **F (Hold)**: Auto-advance mode - continuously advances simulation at 20 ticks/second
 - **R**: Reset/clear the board (all cells become dead, generation resets to 0)
 - **ESC**: Quit the application
 
@@ -63,29 +64,33 @@ When running the application:
 
 The codebase follows a modular structure with clear separation of concerns:
 
-- **`src/main.rs`**: Entry point, window management, event loop, and rendering
+- **`src/main.rs`**: Entry point, window management, event loop, mouse handling, and rendering
 - **`src/board.rs`**: Board struct with Game of Life logic
-- **`src/player.rs`**: Player (cursor) struct for interactive editing
 
 ### Main Module (src/main.rs)
 
 Entry point that:
-- Initializes a 70x70 board and player cursor at (0, 0)
-- Creates a Piston window (700x760 pixels: 700x700 board + 60px UI space)
+- Initializes a 50x50 board
+- Creates a Piston window (1000x1000 pixels dynamically calculated from board size)
 - Sets up window with VSync enabled and ESC key to exit
-- Runs the main event loop with Piston's event system
-- Handles keyboard events and dispatches actions
-- Renders the game board and UI on each frame using `draw_2d()`
-- Tracks generation count (u128) and displays controls/stats
+- Runs the main event loop at 60 FPS with Piston's event system
+- Handles keyboard events for simulation control
+- Handles mouse events for cell editing
+- Tracks pressed keys using HashSet for continuous actions
+- Implements auto-advance mode (F key held) with configurable tick rate
+- Renders the game board on each frame using `draw_2d()`
+- Tracks generation count (u128) and mouse position
 
 **Configuration Constants**:
-- `CELL_SIZE`: 10.0 pixels per cell
-- `BOARD_WIDTH`: 70 cells
-- `BOARD_HEIGHT`: 70 cells
+- `CELL_SIZE`: 20.0 pixels per cell
+- `BOARD_WIDTH`: 50 cells
+- `BOARD_HEIGHT`: 50 cells
+- `FPS`: 60 frames per second
+- `AUTO_TICK_INTERVAL_MS`: 50 milliseconds between auto-ticks (20 ticks/second when F is held)
 
 **Rendering Functions**:
-- `draw_ui()`: Placeholder for UI text (controls, generation, population) - currently unimplemented (src/main.rs:83-89)
-- `draw_board()`: Renders all cells as rectangles with color coding and cursor overlay
+- `draw_ui()`: Placeholder for UI text (controls, generation, population) - currently unimplemented (src/main.rs:126-128)
+- `draw_board()`: Renders all cells as rectangles with color coding
 
 ### Board Module (src/board.rs)
 
@@ -99,21 +104,10 @@ The `Board` struct represents the game grid:
 - **Methods**:
   - `new(size_x, size_y)`: Constructor that creates a board with specified dimensions
   - `make_board(size_x, size_y)`: Static method to initialize an empty grid
-  - `player_toggle_cell(player)`: Toggles cell state at player position and updates population
+  - `player_toggle_cell(board_x, board_y)`: Toggles cell state at given coordinates and updates population
   - `clear_board()`: Resets all cells to dead (0) and population to 0
   - `tick()`: Advances simulation by one generation following Conway's rules
   - `get_neighbour_count(x, y)`: Counts living neighbors for a given cell (used by tick)
-
-### Player Module (src/player.rs)
-
-The `Player` struct represents the cursor position:
-
-- **Fields**:
-  - `x`, `y`: Current cursor coordinates (i8)
-
-- **Methods**:
-  - `new()`: Constructor that initializes cursor at (0, 0)
-  - `move_right(board)`, `move_left(board)`, `move_up(board)`, `move_down(board)`: Movement methods with boundary checking
 
 ## Dependencies
 
@@ -138,21 +132,19 @@ The implementation follows Conway's standard rules (implemented in `Board::tick(
 
 ### Visual Design
 
-- **Window Size**: 700x760 pixels (700x700 game area + 60px top margin for UI)
-- **Cell Size**: 10x10 pixels with 1px gap between cells
-- **Background Color**: Dark gray [0.1, 0.1, 0.1, 1.0]
-- **Living Cells**: Green [0.0, 1.0, 0.0, 1.0]
-- **Dead Cells**: Dark gray [0.2, 0.2, 0.2, 1.0]
-- **Cursor**: Semi-transparent red overlay [1.0, 0.0, 0.0, 0.5]
+- **Window Size**: 1000x1000 pixels (dynamically calculated from board size)
+- **Cell Size**: 20x20 pixels with 1px gap between cells
+- **Background Color**: White [1.0, 1.0, 1.0, 1.0]
+- **Living Cells**: Black [0.1, 0.1, 0.1, 1.0]
+- **Dead Cells**: White [1.0, 1.0, 1.0, 1.0]
 
 ### Rendering Pipeline
 
-1. Clear screen to dark gray background
+1. Clear screen to white background
 2. Call `draw_ui()` for controls/stats (currently a placeholder)
 3. Call `draw_board()` which:
-   - Iterates through all cells (70x70 = 4900 cells)
-   - Draws each cell as a rectangle with appropriate color
-   - Overlays red rectangle at cursor position
+   - Iterates through all cells (50x50 = 2500 cells)
+   - Draws each cell as a rectangle with appropriate color (black for alive, white for dead)
 
 ## Coding Conventions
 
@@ -210,7 +202,7 @@ Currently, no tests are implemented. When adding tests:
 - Test `Board::get_neighbour_count()` with various cell configurations
 - Test `Board::tick()` with known Game of Life patterns (blinkers, gliders, still lifes)
 - Test `Board::clear_board()` to ensure it resets state correctly
-- Test `Player` movement boundary conditions
+- Test `Board::player_toggle_cell()` with various coordinates
 - Test population counting accuracy
 
 ### Integration Tests

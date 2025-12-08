@@ -12,6 +12,9 @@ use piston_window;
 use piston_window::graphics::{Context, Graphics, clear, rectangle};
 use piston_window::*;
 
+// Import timing utilities for auto-advance
+use std::time::{Duration, Instant};
+
 // Import HashSet for tracking pressed keys
 use std::collections::HashSet;
 
@@ -21,6 +24,7 @@ fn main() {
     const BOARD_WIDTH: i8 = 50; // Number of cells horizontally
     const BOARD_HEIGHT: i8 = 50; // Number of cells vertically
     const FPS: u8 = 60;
+    const AUTO_TICK_INTERVAL_MS: u64 = 50; // Milliseconds between auto-ticks when F is held
 
     // Calculate window dimensions based on board size and cell size
     let window_width = (BOARD_WIDTH as f64 * CELL_SIZE) as u32;
@@ -47,6 +51,9 @@ fn main() {
     // Track which keys are currently pressed
     let mut pressed_keys: HashSet<Key> = HashSet::new();
 
+    // Track last auto-tick time for continuous advancement
+    let mut last_auto_tick = Instant::now();
+
     let mut events = Events::new(EventSettings::new().max_fps(FPS as u64));
 
     // Main game loop - processes events and renders frames
@@ -69,6 +76,7 @@ fn main() {
             }
         }
 
+        // Keeps track of mouse and board positions
         if let Some(cursor_pos) = event.mouse_cursor_args() {
             mouse_x = cursor_pos[0];
             mouse_y = cursor_pos[1];
@@ -77,6 +85,7 @@ fn main() {
             board_y = (mouse_y / CELL_SIZE) as i8;
         }
 
+        // If you click it toggles the cell at the mouse position
         if let Some(Button::Mouse(MouseButton::Left)) = event.press_args() {
             board.player_toggle_cell(board_x, board_y);
         }
@@ -86,14 +95,20 @@ fn main() {
             pressed_keys.remove(&key);
         }
 
-        // Handle continuous actions for held keys (during update events)
-        if let Some(_update_args) = event.update_args() {
+        // Handle continuous key press actions (like auto-advance)
+        if pressed_keys.contains(&Key::F) {
+            // Check if enough time has passed since the last auto-tick
+            if last_auto_tick.elapsed() >= Duration::from_millis(AUTO_TICK_INTERVAL_MS) {
+                board.tick();
+                generation += 1;
+                last_auto_tick = Instant::now();
+            }
         }
 
         // Render the game on each frame
         window.draw_2d(&event, |context, graphics, _device| {
             // Clear the screen with a dark background color
-            clear([0.1, 0.1, 0.1, 1.0], graphics);
+            clear([1.0, 1.0, 1.0, 1.0], graphics);
 
             // Draw the UI text at the top of the window
             draw_ui(&board, generation, &context);
@@ -104,31 +119,21 @@ fn main() {
     }
 }
 
-/// Draws the user interface text showing controls, generation count, and population
-///
-/// This function renders two lines of text using simple shapes (since text rendering
-/// in Piston can be complex, we're focusing on the game visualization)
+// Draws the user interface text showing controls, generation count, and population
+// This function renders two lines of text using simple shapes (since text rendering
+// in Piston can be complex, we're focusing on the game visualization)
+
 fn draw_ui(board: &Board, generation: u128, _context: &Context) {
-    // I will add this later if I have time
+    // I will add this later
 }
 
-/// Draws the game board with all cells and the player cursor
-///
-/// Each cell is rendered as a rectangle:
-/// - Living cells: Green rectangles
-/// - Dead cells: Dark gray rectangles
-/// - Cursor position: Semi-transparent red overlay
-fn draw_board<G: Graphics>(
-    board: &Board,
-    cell_size: f64,
-    context: &Context,
-    graphics: &mut G,
-) {
+// Draws the game board with all cells and the player cursor
+fn draw_board<G: Graphics>(board: &Board, cell_size: f64, context: &Context, graphics: &mut G) {
     // Define colors for different cell states
-    let alive_color = [0.0, 1.0, 0.0, 1.0]; // Green for living cells
-    let dead_color = [0.2, 0.2, 0.2, 1.0]; // Dark gray for dead cells
+    let alive_color = [0.1, 0.1, 0.1, 1.0]; // RBGA color skema
+    let dead_color = [1.0, 1.0, 1.0, 1.0]; // RBGA color skema
 
-    // Offset for the board (small top margin)
+    // Offset for the board
     let y_offset: f64 = 0.0;
     let x_offset: f64 = 0.0;
 
@@ -139,7 +144,7 @@ fn draw_board<G: Graphics>(
             let x_pos = x as f64 * cell_size + x_offset;
             let y_pos = y as f64 * cell_size + y_offset;
 
-            // Create a rectangle for this cell (with 1px gap between cells for visual clarity)
+            // Create a rectangle for this cell with 1px gap between cells for visual stuff
             let cell_rect = [x_pos, y_pos, cell_size - 1.0, cell_size - 1.0];
 
             // Determine the cell's color based on its state (alive or dead)
