@@ -10,6 +10,8 @@ Right arrow - Progress a generation
 
 R - Clears the board
 
+F - Fast foward
+
 # Install
 
 You can install a pre-built binary [here](https://github.com/dhogenson/game-of-life/releases/tag/v0.1.0) and install according to your operating system. Once installed unzip it and double click to run.
