@@ -34,20 +34,6 @@ fn main() {
     let window_width = (BOARD_WIDTH as f64 * CELL_SIZE) as u32;
     let window_height = (BOARD_HEIGHT as f64 * CELL_SIZE) as u32;
 
-    // Create the game window with specified dimensions and title
-    // On Windows: Use SDL2 backend for proper resizable(false) support
-    // On Linux: Use default Glutin backend
-    #[cfg(target_os = "windows")]
-    let mut window: PistonWindow<Sdl2Window> =
-        WindowSettings::new("Conway's Game of Life", [window_width, window_height])
-            .exit_on_esc(true) // Allow ESC key to close the window
-            .resizable(false) // Prevent window resizing (works with SDL2 on Windows)
-            .samples(0) // Disable multisampling to avoid alpha mode issues
-            .vsync(true) // Enable vsync for smoother rendering
-            .build()
-            .unwrap();
-
-    #[cfg(not(target_os = "windows"))]
     let mut window: PistonWindow =
         WindowSettings::new("Conway's Game of Life", [window_width, window_height])
             .exit_on_esc(true) // Allow ESC key to close the window

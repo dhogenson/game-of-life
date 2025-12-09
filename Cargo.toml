@@ -7,4 +7,4 @@ edition = "2024"
 piston_window = "0.130.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-pistoncore-sdl2_window = "0.71.0"
+pistoncore-glutin_window = "0.71.0"
