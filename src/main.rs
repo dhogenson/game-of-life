@@ -34,6 +34,7 @@ fn main() {
     let mut window: PistonWindow =
         WindowSettings::new("Conway's Game of Life", [window_width, window_height])
             .exit_on_esc(true) // Allow ESC key to close the window
+            .resizable(false) // Prevent window resizing
             .samples(0) // Disable multisampling to avoid alpha mode issues
             .vsync(true) // Enable vsync for smoother rendering
             .build()
