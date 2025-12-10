@@ -4,10 +4,11 @@
 
 #[derive(Clone)]
 pub struct Board {
-    pub size_x: i8,          // Width of the board (number of columns)
-    pub size_y: i8,          // Height of the board (number of rows)
-    pub board: Vec<Vec<i8>>, // 2D vector storing cell states (0=dead, 1=alive)
-    pub population: u64,     // Total number of living cells
+    pub size_x: i8,           // Width of the board (number of columns)
+    pub size_y: i8,           // Height of the board (number of rows)
+    pub board: Vec<Vec<i8>>,  // 2D vector storing cell states (0=dead, 1=alive)
+    next_board: Vec<Vec<i8>>, // Pre allocated buffer for next generation
+    pub population: u64,      // Total number of living cells
 }
 
 impl Board {
@@ -15,10 +16,12 @@ impl Board {
     // All cells are initialized to dead (0) and population starts at 0
 
     pub fn new(_size_x: i8, _size_y: i8) -> Self {
+        // This returns the value of the struct
         Self {
             size_x: _size_x,
             size_y: _size_y,
             board: Self::make_board(_size_x, _size_y),
+            next_board: Self::make_board(_size_x, _size_y),
             population: 0,
         }
     }
@@ -45,7 +48,7 @@ impl Board {
 
     // Toggles the state of the cell at the player's mouse position
     pub fn player_toggle_cell(&mut self, board_x: i8, board_y: i8) {
-        let cell = &mut self.board[board_y as usize][board_x as usize];
+        let cell: &mut i8 = &mut self.board[board_y as usize][board_x as usize];
 
         if *cell == 0 {
             // Cell is dead, make it alive
@@ -75,19 +78,17 @@ impl Board {
     // - All other live cells die (underpopulation or overpopulation)
     // - All other dead cells stay dead
     pub fn tick(&mut self) {
-        // Create a copy of the board to store the next generation
-        let mut next_board = self.board.clone();
-        let mut new_population = 0;
+        let mut new_population: u64 = 0;
 
         // Process each cell
         for y in 0..self.size_y {
             for x in 0..self.size_x {
                 // Count how many living neighbors this cell has
-                let neighbour_count = self.get_neighbour_count(x, y);
-                let current_state = self.board[y as usize][x as usize];
+                let neighbour_count: i8 = self.get_neighbour_count(x, y);
+                let current_state: i8 = self.board[y as usize][x as usize];
 
                 // Apply Conway's Game of Life rules
-                next_board[y as usize][x as usize] = if current_state == 1 {
+                self.next_board[y as usize][x as usize] = if current_state == 1 {
                     // Cell is currently alive
                     if neighbour_count == 2 || neighbour_count == 3 {
                         1 // Survives
@@ -104,14 +105,14 @@ impl Board {
                 };
 
                 // Count living cells for the new population
-                if next_board[y as usize][x as usize] == 1 {
+                if self.next_board[y as usize][x as usize] == 1 {
                     new_population += 1;
                 }
             }
         }
 
-        // Update the board to the next generation
-        self.board = next_board;
+        // Swap the boards instead of copying
+        std::mem::swap(&mut self.board, &mut self.next_board);
         self.population = new_population;
     }
 
@@ -140,6 +141,6 @@ impl Board {
             }
         }
 
-        neighbour_count
+        neighbour_count // Return the value
     }
 }

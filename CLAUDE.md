@@ -70,6 +70,7 @@ The codebase follows a modular structure with clear separation of concerns:
 ### Main Module (src/main.rs)
 
 Entry point that:
+
 - Initializes a 50x50 board
 - Creates a Piston window (1000x1000 pixels dynamically calculated from board size)
 - Sets up window with VSync enabled and ESC key to exit
@@ -82,6 +83,7 @@ Entry point that:
 - Tracks generation count (u128) and mouse position
 
 **Configuration Constants**:
+
 - `CELL_SIZE`: 20.0 pixels per cell
 - `BOARD_WIDTH`: 50 cells
 - `BOARD_HEIGHT`: 50 cells
@@ -89,13 +91,16 @@ Entry point that:
 - `AUTO_TICK_INTERVAL_MS`: 50 milliseconds between auto-ticks (20 ticks/second when F is held)
 
 **Rendering Functions**:
+
 - `draw_ui()`: Placeholder for UI text (controls, generation, population) - currently unimplemented (src/main.rs:126-128)
 - `draw_board()`: Renders all cells as rectangles with color coding
 
 **Platform-Specific Features**:
+
 - Windows release builds hide the console window using `#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]`
 
 **Key Features**:
+
 - **Mouse Tracking**: Continuously tracks mouse position and converts to board coordinates
 - **Pressed Keys Tracking**: Uses HashSet to track currently pressed keys for continuous actions
 - **Auto-Advance Mode**: When F key is held, automatically advances simulation at 20 ticks/second
@@ -106,6 +111,7 @@ Entry point that:
 The `Board` struct represents the game grid:
 
 - **Fields**:
+
   - `size_x`, `size_y`: Grid dimensions (i8)
   - `board: Vec<Vec<i8>>`: 2D grid storing cell states (0 = dead, 1 = alive)
   - `population: u64`: Current count of living cells
@@ -127,6 +133,7 @@ Listed in `Cargo.toml`:
   - Provides: Graphics context, rectangle drawing, frame rendering, VSync
 
 **Standard Library Usage**:
+
 - **std::time**: Duration and Instant for timing auto-advance ticks
 - **std::collections::HashSet**: Tracking currently pressed keys for continuous actions
 
@@ -267,7 +274,7 @@ mod tests {
 2. **Check for errors**: Run `cargo clippy`
 3. **Build successfully**: Run `cargo build`
 4. **Test manually**: Run `cargo run` and verify functionality
-5. **Run tests**: Run `cargo test` (when tests exist)
+5. **Run tests**: Run `cargo test`
 
 ### Making Changes
 
@@ -290,10 +297,12 @@ mod tests {
 Potential features to add:
 
 ### High Priority
+
 - **Implement UI text display**: Complete the `draw_ui()` function to show controls, generation count, and population (src/main.rs:126-128)
 - **Text rendering**: Integrate a text rendering solution (e.g., `piston_window::Glyphs`, `glyph_brush`)
 
 ### Feature Enhancements
+
 - **Preset patterns**: Load famous Game of Life patterns (glider guns, spaceships, pulsars, etc.)
 - **Save/Load**: Serialize board state to files (JSON, binary, or RLE format)
 - **Configurable board size**: Command-line arguments for dimensions
@@ -307,6 +316,7 @@ Potential features to add:
 - **Mouse drawing mode**: Click and drag to paint multiple cells
 
 ### Advanced Features
+
 - **Statistics panel**: Track max population, generation of last change, stable detection
 - **Undo/Redo**: History for cell editing (before simulation starts)
 - **Grid toggle**: Option to show/hide cell grid lines
@@ -316,6 +326,7 @@ Potential features to add:
 - **Drawing modes**: Line tool, rectangle fill, brush sizes
 
 ### Technical Improvements
+
 - **Optimize rendering**: Only redraw changed cells
 - **Optimize tick**: Use hashset for sparse boards, or quad-tree for large empty areas
 - **Benchmark suite**: Performance tests for large boards

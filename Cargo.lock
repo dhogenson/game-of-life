@@ -359,10 +359,9 @@ checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "game_of_life"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "piston_window",
- "pistoncore-glutin_window 0.71.0",
 ]
 
 [[package]]
@@ -907,7 +906,7 @@ checksum = "e6fcbf72a27ba67eb3a1ccc6cd120ad2035c2881aa841ae470f7146e277b32db"
 dependencies = [
  "pistoncore-event_loop",
  "pistoncore-input",
- "pistoncore-window 1.0.0",
+ "pistoncore-window",
 ]
 
 [[package]]
@@ -996,7 +995,7 @@ dependencies = [
  "piston-texture",
  "piston2d-gfx_graphics",
  "piston2d-graphics",
- "pistoncore-glutin_window 0.72.0",
+ "pistoncore-glutin_window",
  "shader_version",
 ]
 
@@ -1007,24 +1006,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "577f998ddffd70eb0ccb59293587ebd0ace6efdb2280616f1c580ce234613c8b"
 dependencies = [
  "pistoncore-input",
- "pistoncore-window 1.0.0",
+ "pistoncore-window",
  "spin_sleep",
-]
-
-[[package]]
-name = "pistoncore-glutin_window"
-version = "0.71.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65d2af5268a7c85093df16a0a749a7a043fc2bab2f4619114a682685f05b13a7"
-dependencies = [
- "gl",
- "glutin",
- "glutin-winit",
- "pistoncore-input",
- "pistoncore-window 0.47.1",
- "raw-window-handle",
- "shader_version",
- "winit",
 ]
 
 [[package]]
@@ -1037,7 +1020,7 @@ dependencies = [
  "glutin",
  "glutin-winit",
  "pistoncore-input",
- "pistoncore-window 1.0.0",
+ "pistoncore-window",
  "raw-window-handle",
  "shader_version",
  "winit",
@@ -1053,16 +1036,6 @@ dependencies = [
  "piston-viewport",
  "serde",
  "serde_derive",
-]
-
-[[package]]
-name = "pistoncore-window"
-version = "0.47.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d62962b4e9cfc13143c77e032302fedc58a8f0f570d30006cdb38ba00a5e50bf"
-dependencies = [
- "piston-graphics_api_version",
- "pistoncore-input",
 ]
 
 [[package]]

@@ -12,10 +12,6 @@ use piston_window;
 use piston_window::graphics::{Context, Graphics, clear, rectangle};
 use piston_window::*;
 
-// Import SDL2 window backend only on Windows for proper resizable(false) support
-#[cfg(target_os = "windows")]
-use sdl2_window::Sdl2Window;
-
 // Import timing utilities for auto-advance
 use std::time::{Duration, Instant};
 
@@ -27,12 +23,12 @@ fn main() {
     const CELL_SIZE: f64 = 20.0; // Size of each cell in pixels
     const BOARD_WIDTH: i8 = 50; // Number of cells horizontally
     const BOARD_HEIGHT: i8 = 50; // Number of cells vertically
-    const FPS: u8 = 60;
-    const AUTO_TICK_INTERVAL_MS: u64 = 50; // Milliseconds between auto-ticks when F is held
+    const FPS: u8 = 60; // This is the fps of the game
+    const AUTO_TICK_INTERVAL_MS: u64 = 50; // Milliseconds between auto ticks when F is held
 
     // Calculate window dimensions based on board size and cell size
-    let window_width = (BOARD_WIDTH as f64 * CELL_SIZE) as u32;
-    let window_height = (BOARD_HEIGHT as f64 * CELL_SIZE) as u32;
+    let window_width: u32 = (BOARD_WIDTH as f64 * CELL_SIZE) as u32;
+    let window_height: u32 = (BOARD_HEIGHT as f64 * CELL_SIZE) as u32;
 
     let mut window: PistonWindow =
         WindowSettings::new("Conway's Game of Life", [window_width, window_height])
@@ -47,8 +43,6 @@ fn main() {
     let mut board = Board::new(BOARD_WIDTH, BOARD_HEIGHT);
     let mut generation: u128 = 0;
 
-    let mut mouse_x: f64 = 0.0;
-    let mut mouse_y: f64 = 0.0;
     let mut board_x: i8 = 0;
     let mut board_y: i8 = 0;
 
@@ -56,9 +50,9 @@ fn main() {
     let mut pressed_keys: HashSet<Key> = HashSet::new();
 
     // Track last auto-tick time for continuous advancement
-    let mut last_auto_tick = Instant::now();
+    let mut last_auto_tick: Instant = Instant::now();
 
-    let mut events = Events::new(EventSettings::new().max_fps(FPS as u64));
+    let mut events: Events = Events::new(EventSettings::new().max_fps(FPS as u64));
 
     // Main game loop - processes events and renders frames
     while let Some(event) = events.next(&mut window) {
@@ -66,7 +60,7 @@ fn main() {
         if let Some(Button::Keyboard(key)) = event.press_args() {
             pressed_keys.insert(key);
 
-            // Handle one-time press actions (not for continuous movement)
+            // Handle one time press actions
             match key {
                 Key::Right => {
                     board.tick();
@@ -82,8 +76,8 @@ fn main() {
 
         // Keeps track of mouse and board positions
         if let Some(cursor_pos) = event.mouse_cursor_args() {
-            mouse_x = cursor_pos[0];
-            mouse_y = cursor_pos[1];
+            let mouse_x: f64 = cursor_pos[0];
+            let mouse_y: f64 = cursor_pos[1];
 
             board_x = (mouse_x / CELL_SIZE) as i8;
             board_y = (mouse_y / CELL_SIZE) as i8;
@@ -99,9 +93,9 @@ fn main() {
             pressed_keys.remove(&key);
         }
 
-        // Handle continuous key press actions (like auto-advance)
+        // Handle continuous key press actions
         if pressed_keys.contains(&Key::F) {
-            // Check if enough time has passed since the last auto-tick
+            // Check if enough time has passed since the last auto tick
             if last_auto_tick.elapsed() >= Duration::from_millis(AUTO_TICK_INTERVAL_MS) {
                 board.tick();
                 generation += 1;
@@ -123,21 +117,18 @@ fn main() {
     }
 }
 
-// Draws the user interface text showing controls, generation count, and population
-// This function renders two lines of text using simple shapes (since text rendering
-// in Piston can be complex, we're focusing on the game visualization)
-
-fn draw_ui(board: &Board, generation: u128, _context: &Context) {
+// Draws the user interface text showing controls (soon to be)
+fn draw_ui(_board: &Board, _generation: u128, _context: &Context) {
     // I will add this later
 }
 
 // Draws the game board with all cells and the player cursor
 fn draw_board<G: Graphics>(board: &Board, cell_size: f64, context: &Context, graphics: &mut G) {
     // Define colors for different cell states
-    let alive_color = [0.1, 0.1, 0.1, 1.0]; // RBGA color skema
-    let dead_color = [1.0, 1.0, 1.0, 1.0]; // RBGA color skema
+    let alive_color: [f32; 4] = [0.1, 0.1, 0.1, 1.0]; // RBGA color skema (black)
+    let dead_color: [f32; 4] = [1.0, 1.0, 1.0, 1.0]; // RBGA color skema (white)
 
-    // Offset for the board
+    // Offset for the board (no offset for now)
     let y_offset: f64 = 0.0;
     let x_offset: f64 = 0.0;
 
@@ -149,10 +140,10 @@ fn draw_board<G: Graphics>(board: &Board, cell_size: f64, context: &Context, gra
             let y_pos = y as f64 * cell_size + y_offset;
 
             // Create a rectangle for this cell with 1px gap between cells for visual stuff
-            let cell_rect = [x_pos, y_pos, cell_size - 1.0, cell_size - 1.0];
+            let cell_rect: [f64; 4] = [x_pos, y_pos, cell_size - 1.0, cell_size - 1.0];
 
             // Determine the cell's color based on its state (alive or dead)
-            let color = if board.board[y as usize][x as usize] == 1 {
+            let color: [f32; 4] = if board.board[y as usize][x as usize] == 1 {
                 alive_color
             } else {
                 dead_color
